@@ -27,6 +27,7 @@ resultados = []
 for repo in repos_filtrados["nome"]:
     print(f"\n➡️  Coletando PRs de {repo}...")
     page = 1
+    prs_coletados = 0  # contador por repositório
 
     while True:
         pr_url = f"https://api.github.com/repos/{repo}/pulls?state=closed&per_page=50&page={page}"
@@ -101,10 +102,13 @@ for repo in repos_filtrados["nome"]:
                 "reviews": len(reviews)
             })
 
+            prs_coletados += 1
             time.sleep(0.5)  # evita rate limit
 
         page += 1
         time.sleep(1)
+        
+    print(f"✅ Repositório {repo} analisado com sucesso ({prs_coletados} PRs válidos coletados).")
 
 # ================================
 # SALVAR DATASET FINAL
