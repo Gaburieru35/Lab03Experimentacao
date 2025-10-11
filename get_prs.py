@@ -29,7 +29,7 @@ for repo in repos_filtrados["nome"]:
     page = 1
     prs_coletados = 0  # contador por repositório
 
-    while True:
+    while prs_coletados < 100:
         pr_url = f"https://api.github.com/repos/{repo}/pulls?state=closed&per_page=50&page={page}"
         pr_resp = requests.get(pr_url, headers=HEADERS)
         if pr_resp.status_code != 200:
@@ -41,6 +41,10 @@ for repo in repos_filtrados["nome"]:
             break  # fim das páginas
 
         for pr in prs:
+
+            # Limite de PRs por repositório
+            if prs_coletados >= 100:
+                break
             # Verifica datas
             if not pr.get("created_at") or not pr.get("closed_at"):
                 continue
