@@ -1,3 +1,4 @@
+import os
 import requests
 import pandas as pd
 from datetime import datetime
@@ -12,6 +13,41 @@ HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
 # Arquivos
 REPOS_CSV = "repositorios_filtrados.csv"
 OUTPUT_CSV = "dataset_lab03s01.csv"
+
+
+def save_pr_to_csv(record: dict, csv_path: str):
+    """Salva ou atualiza um PR na planilha CSV.
+
+    Regras:
+    - Identifica linhas por (repo, pr_number).
+    - Se existir, atualiza a linha com os novos valores.
+    - Se não existir, anexa uma nova linha.
+    """
+    # Se não existe ainda, cria um DataFrame novo com a única linha
+    if not os.path.exists(csv_path):
+        df_new = pd.DataFrame([record])
+        df_new.to_csv(csv_path, index=False, encoding="utf-8")
+        return
+
+    try:
+        df_existing = pd.read_csv(csv_path)
+    except Exception:
+        # Se não conseguir ler (arquivo corrompido), sobrescreve com novo
+        df_existing = pd.DataFrame()
+
+    # chave única
+    mask = (df_existing.get("repo") == record["repo"]) & (df_existing.get("pr_number") == record["pr_number"]) if not df_existing.empty else pd.Series(dtype=bool)
+
+    if not df_existing.empty and mask.any():
+        # atualiza a(s) linha(s) existentes
+        idx = df_existing[mask].index
+        for col, val in record.items():
+            df_existing.loc[idx, col] = val
+        df_existing.to_csv(csv_path, index=False, encoding="utf-8")
+    else:
+        # anexa nova linha
+        df_existing = pd.concat([df_existing, pd.DataFrame([record])], ignore_index=True)
+        df_existing.to_csv(csv_path, index=False, encoding="utf-8")
 
 # ================================
 # CARREGAR REPOSITÓRIOS FILTRADOS
@@ -105,6 +141,12 @@ for repo in repos_filtrados["nome"]:
                 "review_comments": len(review_comments) if isinstance(review_comments, list) else 0,
                 "reviews": len(reviews)
             })
+            # Salva/atualiza a planilha a cada PR coletado
+            pr_record = resultados[-1]
+            try:
+                save_pr_to_csv(pr_record, OUTPUT_CSV)
+            except Exception as e:
+                print(f"⚠️ Erro ao salvar PR {pr['number']} de {repo}: {e}")
 
             prs_coletados += 1
             time.sleep(0.5)  # evita rate limit
@@ -115,9 +157,34 @@ for repo in repos_filtrados["nome"]:
     print(f"✅ Repositório {repo} analisado com sucesso ({prs_coletados} PRs válidos coletados).")
 
 # ================================
-# SALVAR DATASET FINAL
+# SALVAR DATASET FINAL (mescla segura)
 # ================================
 df = pd.DataFrame(resultados)
-df.to_csv(OUTPUT_CSV, index=False, encoding="utf-8")
-print(f"\n✅ Dataset completo salvo como {OUTPUT_CSV}")
-print(f"Total de PRs coletados: {len(df)}")
+
+# Se não houver resultados nesta execução, apenas informa o que existe
+if df.empty:
+    if os.path.exists(OUTPUT_CSV):
+        df_existing = pd.read_csv(OUTPUT_CSV)
+        print(f"\nℹ️ Nenhum PR novo coletado nesta execução. {len(df_existing)} PRs já presentes em {OUTPUT_CSV}.")
+    else:
+        print(f"\nℹ️ Nenhum PR coletado e {OUTPUT_CSV} não existe.")
+else:
+    # Se já existir um CSV, mescla atualizações para evitar sobrescrever PRs de execuções anteriores
+    if os.path.exists(OUTPUT_CSV):
+        try:
+            df_existing = pd.read_csv(OUTPUT_CSV)
+            combined = pd.concat([df_existing, df], ignore_index=True)
+            # remove duplicatas mantendo a versão mais recente (última linha) para cada PR
+            combined.drop_duplicates(subset=["repo", "pr_number"], keep="last", inplace=True)
+            combined.to_csv(OUTPUT_CSV, index=False, encoding="utf-8")
+            total_count = len(combined)
+            print(f"\n✅ Dataset mesclado salvo como {OUTPUT_CSV} ({len(df)} PRs novos/atualizados, total {total_count}).")
+        except Exception as e:
+            # Em caso de erro ao mesclar, salva apenas os resultados atuais (evita perder o que foi coletado agora)
+            df.to_csv(OUTPUT_CSV, index=False, encoding="utf-8")
+            print(f"\n⚠️ Erro ao mesclar com {OUTPUT_CSV}: {e}. Arquivo sobrescrito com os PRs desta execução ({len(df)} itens).")
+    else:
+        df.to_csv(OUTPUT_CSV, index=False, encoding="utf-8")
+        print(f"\n✅ Dataset salvo como {OUTPUT_CSV} ({len(df)} PRs).")
+
+    print(f"Total de PRs coletados nesta execução: {len(df)}")
