@@ -1,0 +1,9 @@
+RQ,x,y,correlacao_pearson
+RQ01,tamanho_arquivos,feedback_final,-0.009264309054912885
+RQ02,tempo_analise_horas,feedback_final,-0.2659525280541763
+RQ03,descricao_len,feedback_final,0.026949784658939945
+RQ04,interacoes,feedback_final,-0.10848618077654403
+RQ05,tamanho_arquivos,num_revisoes,0.01694008587687978
+RQ06,tempo_analise_horas,num_revisoes,0.004107731186583739
+RQ07,descricao_len,num_revisoes,-0.005452860738412264
+RQ08,interacoes,num_revisoes,0.718544468823206
