@@ -104,9 +104,9 @@ As questões foram estruturadas em duas dimensões principais: **feedback final 
 | Interações × Revisões | +0,389 | Correlação positiva moderada — mais interação entre participantes implica mais revisões. |
 
 ### 5.3. Visualizações sugeridas
-- 📊 **Boxplots** comparando PRs merged vs closed por tamanho e tempo.  
-- 📈 **Scatterplots** entre tamanho × revisões e tempo × revisões.  
-- 🥧 **Gráfico de pizza** mostrando proporção de PRs merged e closed.  
+- Alguns gráficos gerados:
+![Grafico RQ01](https://github.com/Gaburieru35/Lab03Experimentacao/blob/main/graficos/RQ01.png?raw=true)
+![Grafico RQ02](https://github.com/Gaburieru35/Lab03Experimentacao/blob/main/graficos/RQ02.png?raw=true)
 
 ---
 
@@ -199,5 +199,6 @@ As questões foram estruturadas em duas dimensões principais: **feedback final 
   - Avaliar o impacto de revisores experientes no tempo de merge.  
 
 ---
+
 
 
