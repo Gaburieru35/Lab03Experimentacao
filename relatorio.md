@@ -105,7 +105,9 @@ As questões foram estruturadas em duas dimensões principais: **feedback final 
 
 ### 5.3. Visualizações sugeridas
 - Alguns gráficos gerados:
+  - RQ01
 ![Grafico RQ01](https://github.com/Gaburieru35/Lab03Experimentacao/blob/main/graficos/RQ01.png?raw=true)
+  - RQ02
 ![Grafico RQ02](https://github.com/Gaburieru35/Lab03Experimentacao/blob/main/graficos/RQ02.png?raw=true)
 
 ---
@@ -199,6 +201,7 @@ As questões foram estruturadas em duas dimensões principais: **feedback final 
   - Avaliar o impacto de revisores experientes no tempo de merge.  
 
 ---
+
 
 
 
